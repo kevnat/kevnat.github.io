@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
-import SectionPage from "../components/section-page";
-import { content } from "./data";
+import ContentPage from "../components/content-page";
 
 export const metadata: Metadata = {
   title: "About",
 };
 
-export default function AboutPage() {
-  return <SectionPage content={content} />;
+export default function UaboutPage() {
+  return <ContentPage id="about" />;
 }

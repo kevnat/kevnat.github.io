@@ -1,10 +1,12 @@
 import BackLink from "./back-link";
+import Markdown from "./markdown";
 
 export type SectionContent = {
   eyebrow: string;
   title: string;
   lede: string;
-  items: { title: string; body: string }[];
+  introHtml: string;
+  items: { slug: string; title: string; html: string }[];
 };
 
 export default function SectionPage({ content }: { content: SectionContent }) {
@@ -19,14 +21,16 @@ export default function SectionPage({ content }: { content: SectionContent }) {
         <p className="mt-6 text-lg leading-relaxed text-muted-foreground">
           {content.lede}
         </p>
+        <Markdown html={content.introHtml} className="mt-6" />
       </header>
       <ul className="mt-12 divide-y divide-border border-y border-border">
-        {content.items.map((item, i) => (
-          <li key={`${i}-${item.title}`} className="py-6">
+        {content.items.map((item) => (
+          <li key={item.slug} className="py-6">
             <h2 className="text-xl tracking-wide">{item.title}</h2>
-            <p className="mt-2 leading-relaxed text-muted-foreground">
-              {item.body}
-            </p>
+            <Markdown
+              html={item.html}
+              className="mt-2 text-muted-foreground"
+            />
           </li>
         ))}
       </ul>
