@@ -102,6 +102,7 @@ export default function Scene() {
         className="scene-camera fixed inset-0 z-[1]"
         style={{
           transformOrigin: "0 0",
+          willChange: "transform, filter",
           transform: camera,
           filter: isHome ? "none" : "blur(1.2px) brightness(0.85)",
           transition: animate
@@ -198,6 +199,9 @@ export default function Scene() {
                       width: `${h.width * 100}%`,
                       height: `${h.height * 100}%`,
                     }}
+                    // The link goes inert on navigation, so mouseleave never
+                    // fires; clear here or the hover glow pops on when we return.
+                    onClick={() => setHoverId(null)}
                     onMouseEnter={() => setHoverId(h.id)}
                     onMouseLeave={() => setHoverId(null)}
                     onFocus={() => setHoverId(h.id)}
