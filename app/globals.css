@@ -271,12 +271,25 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .scene-credenza {
+  .scene-camera {
     transition: none !important;
   }
 
   .scene-record-disc {
     animation: none;
+  }
+}
+
+/* Inner pages at md+ sit over the dark zoomed scene, whatever the system theme */
+@media (min-width: 768px) {
+  .scene-overlay {
+    --background: #2b2418;
+    --foreground: #f0e2cf;
+    --muted-foreground: #cdbfa8;
+    --surface: #3a2f22;
+    --border: rgba(240, 226, 207, 0.28);
+    --accent: #c9a377;
+    color: var(--foreground);
   }
 }
 

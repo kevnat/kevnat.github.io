@@ -13,11 +13,11 @@ export const hotspots: Hotspot[] = [
   // Tube amp
   { id: "focus", left: 0.55, top: 0.3653, width: 0.12, height: 0.0944 },
   // Vinyl crate
-  { id: "side-projects", left: 0.6469, top: 0.6472, width: 0.1258, height: 0.1972 },
+  { id: "resume", left: 0.6469, top: 0.6472, width: 0.1258, height: 0.1972 },
   // Bronze sculpture on books
   { id: "about", left: 0.2426, top: 0.4854, width: 0.1156, height: 0.1424 },
   // Burl-wood box
-  { id: "resume", left: 0.5418, top: 0.5576, width: 0.1129, height: 0.0701 },
+  { id: "side-projects", left: 0.5418, top: 0.5576, width: 0.1129, height: 0.0701 },
 ];
 
 // Credenza bounds within the canvas (from the cutout's alpha channel).

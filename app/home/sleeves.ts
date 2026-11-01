@@ -15,27 +15,27 @@ export const intro = {
 
 export const sleeves: Sleeve[] = [
   {
-    id: "focus",
-    index: "A1",
-    title: "Focus",
-    caption: "My current role and prototypes",
-    href: "/focus",
-    glowX: 0.2,
-  },
-  {
-    id: "side-projects",
-    index: "A2",
-    title: "Side projects",
-    caption: "What I build when the laptop closes",
-    href: "/side-projects",
-    glowX: 0.4,
-  },
-  {
     id: "about",
-    index: "B1",
+    index: "A1",
     title: "About me",
     caption: "The person behind the roadmap",
     href: "/about",
+    glowX: 0.2,
+  },
+  {
+    id: "focus",
+    index: "A2",
+    title: "Focus",
+    caption: "My current role and prototypes",
+    href: "/focus",
+    glowX: 0.4,
+  },
+  {
+    id: "side-projects",
+    index: "B1",
+    title: "Side projects",
+    caption: "What I build when the laptop closes",
+    href: "/side-projects",
     glowX: 0.6,
   },
   {

@@ -2,7 +2,7 @@ import type { SectionContent } from "../components/section-page";
 
 // Placeholder copy: replace with real content.
 export const content: SectionContent = {
-  eyebrow: "A1",
+  eyebrow: "A2",
   title: "Focus",
   lede: "Placeholder: my current role, and the prototypes I'm exploring alongside it.",
   items: [

@@ -6,8 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useLayoutEffect, useState } from "react";
 import { intro, sleeves } from "../../home/sleeves";
-import { credenzaBounds, hotspots, lamp } from "./hotspots";
-import Record from "./record";
+import { hotspots, lamp } from "./hotspots";
 
 const AmbientCanvas = dynamic(() => import("../../home/ambient-canvas"), {
   ssr: false,
@@ -17,19 +16,15 @@ const useIsoLayoutEffect =
   typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 const WALL = "#866754";
-const MINI_MARGIN = 24;
+const ZOOM = 2.6;
 
 type Geo = {
   W: number;
   H: number;
   L: number;
   T: number;
-  S: number;
-  tx: number;
-  ty: number;
-  miniW: number;
-  miniH: number;
-  recordSize: number;
+  vw: number;
+  vh: number;
 };
 
 // The stage is a 16:9 box covering the viewport (capped so the credenza never
@@ -39,15 +34,19 @@ function computeGeo(): Geo {
   const vh = window.innerHeight;
   const W = Math.min(Math.max(vw, (vh * 16) / 9), vw * 1.155);
   const H = (W * 9) / 16;
-  const L = (vw - W) / 2;
-  const T = vh - H;
-  const miniW = Math.min(Math.max(vw * 0.18, 240), 340);
-  const S = miniW / ((credenzaBounds.right - credenzaBounds.left) * W);
-  const tx = MINI_MARGIN - L - S * credenzaBounds.left * W;
-  const ty = vh - MINI_MARGIN - T - S * credenzaBounds.bottom * H;
-  const miniH = (credenzaBounds.bottom - credenzaBounds.top) * H * S;
-  const recordSize = Math.round(Math.min(Math.max(miniW * 0.3, 64), 96));
-  return { W, H, L, T, S, tx, ty, miniW, miniH, recordSize };
+  return { W, H, L: (vw - W) / 2, T: vh - H, vw, vh };
+}
+
+// Camera that centres a hotspot in the viewport at ZOOM, clamped so the stage
+// never leaves the screen. The stage always covers the viewport (L <= 0, T <= 0).
+function cameraFor(h: (typeof hotspots)[number], g: Geo) {
+  const cx = g.L + (h.left + h.width / 2) * g.W;
+  const cy = g.T + (h.top + h.height / 2) * g.H;
+  const clamp = (v: number, lo: number, hi: number) =>
+    Math.min(hi, Math.max(lo, v));
+  const tx = clamp(g.vw / 2 - ZOOM * cx, g.vw - ZOOM * (g.L + g.W), -ZOOM * g.L);
+  const ty = clamp(g.vh * 0.45 - ZOOM * cy, g.vh - ZOOM * (g.T + g.H), -ZOOM * g.T);
+  return `translate(${tx}px, ${ty}px) scale(${ZOOM})`;
 }
 
 export default function Scene() {
@@ -91,179 +90,149 @@ export default function Scene() {
   const stageBox = geo
     ? { left: geo.L, top: geo.T, width: geo.W, height: geo.H }
     : undefined;
+  const activeHotspot = hotspots.find((h) => h.id === activeId);
+  const camera =
+    geo && !isHome && activeHotspot ? cameraFor(activeHotspot, geo) : "none";
 
   return (
     <div className="hidden md:block">
+      {/* Everything inside zooms together, so layers stay aligned. */}
       <div
-        aria-hidden="true"
-        className="fixed inset-0 z-0"
-        style={{ background: WALL, opacity: isHome ? 1 : 0, transition: fade }}
-      />
-
-      {geo && (
-        <div
-          aria-hidden="true"
-          className="fixed z-[1]"
-          style={{
-            ...stageBox,
-            opacity: isHome ? 1 : 0,
-            transition: fade,
-            maskImage:
-              geo.T > 1
-                ? "linear-gradient(to bottom, transparent, #000 8%)"
-                : undefined,
-          }}
-        >
-          <Image
-            src="/scene/room.webp"
-            alt=""
-            fill
-            priority
-            unoptimized
-            sizes="100vw"
-          />
-        </div>
-      )}
-
-      <div
-        aria-hidden="true"
-        className="fixed inset-0 z-[2]"
+        aria-hidden={!isHome}
+        className="scene-camera fixed inset-0 z-[1]"
         style={{
-          opacity: isHome ? 1 : 0,
-          transition: fade,
-          // Blend here, not on the canvas: this wrapper's stacking context
-          // would otherwise isolate the canvas from the room behind it.
-          mixBlendMode: "screen",
+          transformOrigin: "0 0",
+          transform: camera,
+          filter: isHome ? "none" : "blur(1.2px) brightness(0.85)",
+          transition: animate
+            ? "transform 1.1s cubic-bezier(0.65, 0.05, 0.2, 1), filter 1s ease"
+            : "none",
         }}
       >
-        <AmbientCanvas
-          overlay
-          paused={!isHome}
-          glowX={glowX}
-          glowY={glowY}
-        />
-      </div>
-
-      {/* Page backdrop for inner pages: solid, so existing pages read as before */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none fixed inset-0 z-[3] bg-background"
-        style={{ opacity: isHome ? 0 : 1, transition: fade }}
-      />
-
-      {geo && (
         <div
           aria-hidden="true"
-          className="pointer-events-none fixed bottom-0 left-0 z-[15]"
-          style={{
-            width: MINI_MARGIN + geo.miniW + 40 + geo.recordSize + 80,
-            height: geo.miniH + MINI_MARGIN + 90,
-            background:
-              "radial-gradient(ellipse at 0% 100%, var(--background) 55%, transparent 100%)",
-            opacity: isHome ? 0 : 1,
-            transition: fade,
-          }}
+          className="absolute inset-0 z-0"
+          style={{ background: WALL }}
         />
-      )}
 
-      {geo && (
+        {geo && (
+          <div
+            aria-hidden="true"
+            className="absolute z-[1]"
+            style={{
+              ...stageBox,
+              maskImage:
+                geo.T > 1
+                  ? "linear-gradient(to bottom, transparent, #000 8%)"
+                  : undefined,
+            }}
+          >
+            <Image
+              src="/scene/room.webp"
+              alt=""
+              fill
+              priority
+              unoptimized
+              sizes="100vw"
+            />
+          </div>
+        )}
+
         <div
-          className="scene-credenza pointer-events-none fixed z-20"
+          aria-hidden="true"
+          className="absolute inset-0 z-[2]"
           style={{
-            ...stageBox,
-            transformOrigin: "0 0",
-            transform: isHome
-              ? "none"
-              : `translate(${geo.tx}px, ${geo.ty}px) scale(${geo.S})`,
-            transition: animate
-              ? "transform 1.1s cubic-bezier(0.65, 0.05, 0.2, 1)"
-              : "none",
+            // Blend here, not on the canvas: this wrapper's stacking context
+            // would otherwise isolate the canvas from the room behind it.
+            mixBlendMode: "screen",
           }}
         >
-          <div className="scene-floor-shadow" aria-hidden="true" />
-          <Image
-            src="/scene/credenza.webp"
-            alt=""
-            fill
-            priority
-            unoptimized
-            sizes="100vw"
-            aria-hidden="true"
-          />
-          {lit && (
+          <AmbientCanvas overlay glowX={glowX} glowY={glowY} />
+        </div>
+
+        {geo && (
+          <div className="pointer-events-none absolute z-20" style={stageBox}>
+            <div className="scene-floor-shadow" aria-hidden="true" />
             <Image
               src="/scene/credenza.webp"
               alt=""
               fill
+              priority
               unoptimized
               sizes="100vw"
               aria-hidden="true"
-              className="scene-highlight"
-              style={{
-                opacity: hoverId ? 1 : 0.55,
-                maskImage: `radial-gradient(ellipse ${lit.width * 85}% ${lit.height * 110}% at ${(lit.left + lit.width / 2) * 100}% ${(lit.top + lit.height / 2) * 100}%, #000 35%, transparent 100%)`,
-                WebkitMaskImage: `radial-gradient(ellipse ${lit.width * 85}% ${lit.height * 110}% at ${(lit.left + lit.width / 2) * 100}% ${(lit.top + lit.height / 2) * 100}%, #000 35%, transparent 100%)`,
-              }}
             />
-          )}
+            {isHome && hoverId && lit && (
+              <Image
+                src="/scene/credenza.webp"
+                alt=""
+                fill
+                unoptimized
+                sizes="100vw"
+                aria-hidden="true"
+                className="scene-highlight"
+                style={{
+                  maskImage: `radial-gradient(ellipse ${lit.width * 85}% ${lit.height * 110}% at ${(lit.left + lit.width / 2) * 100}% ${(lit.top + lit.height / 2) * 100}%, #000 35%, transparent 100%)`,
+                  WebkitMaskImage: `radial-gradient(ellipse ${lit.width * 85}% ${lit.height * 110}% at ${(lit.left + lit.width / 2) * 100}% ${(lit.top + lit.height / 2) * 100}%, #000 35%, transparent 100%)`,
+                }}
+              />
+            )}
 
-          <nav aria-label="Sections" className="absolute inset-0">
-            {hotspots.map((h) => {
-              const sleeve = sleeves.find((s) => s.id === h.id);
-              if (!sleeve) return null;
-              return (
-                <Link
-                  key={h.id}
-                  href={sleeve.href}
-                  aria-label={sleeve.title}
-                  aria-current={h.id === activeId ? "page" : undefined}
-                  className="scene-hotspot"
-                  style={{
-                    left: `${h.left * 100}%`,
-                    top: `${h.top * 100}%`,
-                    width: `${h.width * 100}%`,
-                    height: `${h.height * 100}%`,
-                  }}
-                  onMouseEnter={() => setHoverId(h.id)}
-                  onMouseLeave={() => setHoverId(null)}
-                  onFocus={() => setHoverId(h.id)}
-                  onBlur={() => setHoverId(null)}
-                >
-                  <span
-                    className="scene-label"
+            <nav
+              aria-label="Sections"
+              className="absolute inset-0"
+              inert={!isHome}
+            >
+              {hotspots.map((h) => {
+                const sleeve = sleeves.find((s) => s.id === h.id);
+                if (!sleeve) return null;
+                return (
+                  <Link
+                    key={h.id}
+                    href={sleeve.href}
+                    aria-label={sleeve.title}
+                    className="scene-hotspot"
                     style={{
-                      transform: `translateX(-50%) scale(${isHome ? 1 : 1 / geo.S})`,
+                      left: `${h.left * 100}%`,
+                      top: `${h.top * 100}%`,
+                      width: `${h.width * 100}%`,
+                      height: `${h.height * 100}%`,
                     }}
+                    onMouseEnter={() => setHoverId(h.id)}
+                    onMouseLeave={() => setHoverId(null)}
+                    onFocus={() => setHoverId(h.id)}
+                    onBlur={() => setHoverId(null)}
                   >
-                    {sleeve.title}
-                  </span>
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
-      )}
+                    <span
+                      className="scene-label"
+                      style={{ transform: "translateX(-50%)" }}
+                    >
+                      {sleeve.title}
+                    </span>
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
+        )}
+      </div>
 
-      {geo && (
-        <div
-          className="fixed z-20"
-          style={{
-            left: MINI_MARGIN + geo.miniW + 16,
-            bottom: MINI_MARGIN,
-            opacity: isHome ? 0 : 1,
-            transition: animate
-              ? `opacity 0.8s ease ${isHome ? "0s" : "0.7s"}`
-              : "none",
-          }}
-        >
-          <Record size={geo.recordSize} />
-        </div>
-      )}
+      {/* Dim the zoomed scene so page content reads over it */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-0 z-[5]"
+        style={{
+          background:
+            "radial-gradient(ellipse at 50% 45%, rgba(20,13,8,.55) 0%, rgba(20,13,8,.78) 100%)",
+          opacity: isHome ? 0 : 1,
+          transition: fade,
+        }}
+      />
 
       <div
         className="pointer-events-none fixed z-20"
         style={{
-          left: MINI_MARGIN,
+          left: 24,
           bottom: 18,
           opacity: isHome ? 1 : 0,
           transition: animate ? "opacity 0.8s ease" : "none",
