@@ -79,3 +79,213 @@ body {
     animation: none;
   }
 }
+
+/* Home: hi-fi listening room */
+.home-fallback {
+  background:
+    radial-gradient(
+      ellipse at 50% 40%,
+      color-mix(in srgb, var(--accent) 28%, transparent),
+      transparent 60%
+    ),
+    color-mix(in srgb, var(--background) 55%, black);
+}
+
+.home-canvas {
+  animation: home-fade 2s ease-out both;
+}
+
+@keyframes home-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes home-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.home-rise {
+  opacity: 0;
+  animation: home-rise 1.2s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+}
+
+.home-sleeve {
+  transition:
+    transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1),
+    opacity 0.5s ease,
+    border-color 0.5s ease;
+}
+
+.home-sleeve:hover,
+.home-sleeve:focus-visible {
+  transform: translateY(-12px);
+  border-color: var(--accent);
+  outline: none;
+}
+
+.home-sleeve[data-dimmed="true"] {
+  opacity: 0.45;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-canvas {
+    animation: none;
+  }
+
+  .home-rise {
+    opacity: 1;
+    animation: none;
+  }
+
+  .home-sleeve {
+    transition: none;
+  }
+
+  .home-sleeve:hover,
+  .home-sleeve:focus-visible {
+    transform: none;
+  }
+}
+
+/* Scene: credenza hotspots, labels, record */
+.scene-floor-shadow {
+  position: absolute;
+  left: 15%;
+  top: 92.5%;
+  width: 70%;
+  height: 7%;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.5), transparent 70%);
+  filter: blur(8px);
+}
+
+.scene-highlight {
+  filter: brightness(1.4) saturate(1.15);
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.scene-hotspot {
+  position: absolute;
+  display: block;
+  pointer-events: auto;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+.scene-label {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 6px);
+  transform-origin: 50% 100%;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #f3e3cc;
+  padding: 4px 8px 3px;
+  border-radius: 3px;
+  background: rgba(22, 14, 9, 0.62);
+  backdrop-filter: blur(3px);
+}
+
+.scene-label::after {
+  content: "";
+  display: block;
+  width: 1px;
+  height: 14px;
+  margin: 4px auto 0;
+  background: rgba(243, 227, 204, 0.6);
+}
+
+.scene-hotspot:hover .scene-label,
+.scene-hotspot:focus-visible .scene-label {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .scene-label {
+    opacity: 0.7;
+  }
+}
+
+.scene-name {
+  font-size: 13px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: #f0e2cf;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6);
+}
+
+.scene-record {
+  position: relative;
+  border-radius: 50%;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45);
+}
+
+.scene-record::after {
+  /* fixed sheen so the spin reads against stationary light */
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 40deg,
+    transparent 0 18%,
+    rgba(255, 255, 255, 0.12) 25%,
+    transparent 32% 68%,
+    rgba(255, 255, 255, 0.1) 75%,
+    transparent 82%
+  );
+}
+
+.scene-record-disc {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, #0b0b0b 0 2.5%, transparent 3%),
+    radial-gradient(circle, var(--accent) 0 17%, #111 17.5% 20%, transparent 20.5%),
+    repeating-radial-gradient(circle at center, #0d0d0d 0 1.5px, #1c1c1c 1.5px 3px);
+  animation: record-spin 1.8s linear infinite;
+}
+
+@keyframes record-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scene-credenza {
+    transition: none !important;
+  }
+
+  .scene-record-disc {
+    animation: none;
+  }
+}
+
+/* Phone home: always a dark, warm room regardless of the system theme */
+.home-stage {
+  --background: #2b2418;
+  --foreground: #f0e2cf;
+  --muted-foreground: #cdbfa8;
+  --surface: #3a2f22;
+  --border: rgba(240, 226, 207, 0.28);
+  --accent: #c9a377;
+}

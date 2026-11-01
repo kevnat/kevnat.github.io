@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import BackLink from "../components/back-link";
 import { profile, timeline, type Highlight, type TimelineEntry } from "./data";
 
 const TYPE_LABEL: Record<Highlight["type"], string> = {
@@ -16,6 +17,7 @@ export default function ResumeClient() {
 
   return (
     <div className="mx-auto w-full max-w-6xl px-6 pt-16 lg:px-8">
+      <BackLink />
       <ProfileHeader />
       <div className="grid grid-cols-1 gap-8 py-12 lg:grid-cols-[220px_1fr_320px] lg:gap-12">
         <TimelineNav

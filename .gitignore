@@ -34,3 +34,6 @@ next-env.d.ts
 
 # source resume documents (content is authored in app/resume/data.ts instead)
 *.docx
+
+# large source art (optimized copies live in public/scene)
+assets-src/
