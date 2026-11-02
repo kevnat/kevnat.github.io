@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist_Mono, Zen_Kaku_Gothic_New } from "next/font/google";
 import ComingSoon from "./components/coming-soon";
 import SceneShell from "./components/scene-shell";
@@ -16,6 +16,12 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// Declaring the page dark makes the browser's default canvas dark too, which is
+// what shows before the stylesheet arrives (a body colour can't cover that).
+export const viewport: Viewport = comingSoon
+  ? { colorScheme: "dark", themeColor: "#1c150e" }
+  : {};
+
 export const metadata: Metadata = {
   robots: comingSoon ? { index: false, follow: false } : undefined,
   title: {
@@ -30,6 +36,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       className={`${zenKakuGothicNew.variable} ${geistMono.variable} h-full antialiased`}
+      style={comingSoon ? { background: "#1c150e" } : undefined}
     >
       <body
         className="min-h-full flex flex-col"
