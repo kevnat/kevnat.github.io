@@ -27,7 +27,7 @@ jobs:
       - run: npm ci
       - run: npm run build
         env:
-          NEXT_PUBLIC_BASE_PATH: /portfolio
+          # NEXT_PUBLIC_BASE_PATH: /portfolio
           # Production shows "coming soon" by default. To go live, add:
           # NEXT_PUBLIC_COMING_SOON: "false"
       - uses: actions/upload-pages-artifact@v3
