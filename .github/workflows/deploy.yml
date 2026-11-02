@@ -26,10 +26,10 @@ jobs:
       - uses: actions/configure-pages@v5
       - run: npm ci
       - run: npm run build
-        env:
-          # NEXT_PUBLIC_BASE_PATH: /portfolio
-          # Production shows "coming soon" by default. To go live, add:
-          # NEXT_PUBLIC_COMING_SOON: "false"
+        # Production shows "coming soon" by default. To go live, add:
+        #   env:
+        #     NEXT_PUBLIC_COMING_SOON: "false"
+        # (The site lives at the root, so no NEXT_PUBLIC_BASE_PATH is needed.)
       - uses: actions/upload-pages-artifact@v3
         with:
           path: out
