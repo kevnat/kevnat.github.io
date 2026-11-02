@@ -33,6 +33,8 @@
 }
 
 body {
+  /* beats the inline opacity:0 set while the stylesheet is loading */
+  opacity: 1 !important;
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;

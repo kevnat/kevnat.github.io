@@ -41,7 +41,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body
         className="min-h-full flex flex-col"
         // Coming soon is all dark room: match it so nothing white shows before the scene paints.
-        style={comingSoon ? { background: "#1c150e" } : undefined}
+        // Hidden until the stylesheet lands (globals.css forces it visible), so
+        // the copy never flashes unstyled.
+        style={comingSoon ? { background: "#1c150e", opacity: 0 } : undefined}
       >
         {comingSoon ? (
           <ComingSoon />
