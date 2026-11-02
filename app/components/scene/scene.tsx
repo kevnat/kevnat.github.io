@@ -206,58 +206,75 @@ export default function Scene({ locked = false }: { locked?: boolean }) {
               );
             })}
 
-            {!locked && (
-              <nav
-                aria-label="Sections"
-                className="absolute inset-0"
-                inert={!isHome}
-              >
-                {hotspots.map((h) => {
-                  const sleeve = sleeves.find((s) => s.id === h.id);
-                  if (!sleeve) return null;
+            <nav
+              aria-label="Sections"
+              aria-hidden={locked || undefined}
+              className="absolute inset-0"
+              inert={!isHome}
+            >
+              {hotspots.map((h) => {
+                const sleeve = sleeves.find((s) => s.id === h.id);
+                if (!sleeve) return null;
+                const label = (
+                  <span
+                    className="scene-label"
+                    data-intro={introActive ? "" : undefined}
+                    style={{
+                      transform: "translateX(-50%)",
+                      animationDelay: introActive
+                        ? `${1.4 + sleeves.indexOf(sleeve) * 0.55}s`
+                        : undefined,
+                    }}
+                  >
+                    {sleeve.title}
+                  </span>
+                );
+                const box = {
+                  left: `${h.left * 100}%`,
+                  top: `${h.top * 100}%`,
+                  width: `${h.width * 100}%`,
+                  height: `${h.height * 100}%`,
+                };
+                // Coming soon: hover shows the title and glow, but nothing is a link.
+                if (locked) {
                   return (
-                    <Link
+                    <div
                       key={h.id}
-                      href={sleeve.href}
-                      aria-label={sleeve.title}
                       className="scene-hotspot"
-                      style={{
-                        left: `${h.left * 100}%`,
-                        top: `${h.top * 100}%`,
-                        width: `${h.width * 100}%`,
-                        height: `${h.height * 100}%`,
-                      }}
-                      // The link goes inert on navigation, so mouseleave never
-                      // fires; clear here or the hover glow pops on when we return.
-                      onClick={() => {
-                        setHoverId(null);
-                        setIntroDone(true);
-                      }}
-                      onMouseEnter={() => {
-                        setHoverId(h.id);
-                        setIntroDone(true);
-                      }}
+                      style={{ ...box, cursor: "default" }}
+                      onMouseEnter={() => setHoverId(h.id)}
                       onMouseLeave={() => setHoverId(null)}
-                      onFocus={() => setHoverId(h.id)}
-                      onBlur={() => setHoverId(null)}
                     >
-                      <span
-                        className="scene-label"
-                        data-intro={introActive ? "" : undefined}
-                        style={{
-                          transform: "translateX(-50%)",
-                          animationDelay: introActive
-                            ? `${1.4 + sleeves.indexOf(sleeve) * 0.55}s`
-                            : undefined,
-                        }}
-                      >
-                        {sleeve.title}
-                      </span>
-                    </Link>
+                      {label}
+                    </div>
                   );
-                })}
-              </nav>
-            )}
+                }
+                return (
+                  <Link
+                    key={h.id}
+                    href={sleeve.href}
+                    aria-label={sleeve.title}
+                    className="scene-hotspot"
+                    style={box}
+                    // The link goes inert on navigation, so mouseleave never
+                    // fires; clear here or the hover glow pops on when we return.
+                    onClick={() => {
+                      setHoverId(null);
+                      setIntroDone(true);
+                    }}
+                    onMouseEnter={() => {
+                      setHoverId(h.id);
+                      setIntroDone(true);
+                    }}
+                    onMouseLeave={() => setHoverId(null)}
+                    onFocus={() => setHoverId(h.id)}
+                    onBlur={() => setHoverId(null)}
+                  >
+                    {label}
+                  </Link>
+                );
+              })}
+            </nav>
           </div>
         )}
       </div>
