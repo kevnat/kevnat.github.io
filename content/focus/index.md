@@ -1,4 +1,4 @@
 ---
 title: "Focus"
-lede: "Placeholder: my current role, and the prototypes I'm exploring alongside it."
+lede: "Payments at BillingPlatform, and the prototypes I build to get ahead of the roadmap."
 ---

@@ -16,6 +16,8 @@ const useIsoLayoutEffect =
   typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 const WALL = "#866754";
+// next/image doesn't add basePath to unoptimized srcs.
+const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 const ZOOM = 2.6;
 
 type Geo = {
@@ -129,7 +131,7 @@ export default function Scene() {
             }}
           >
             <Image
-              src="/scene/room.webp"
+              src={`${BASE}/scene/room.webp`}
               alt=""
               fill
               priority
@@ -155,7 +157,7 @@ export default function Scene() {
           <div className="pointer-events-none absolute z-20" style={stageBox}>
             <div className="scene-floor-shadow" aria-hidden="true" />
             <Image
-              src="/scene/credenza.webp"
+              src={`${BASE}/scene/credenza.webp`}
               alt=""
               fill
               priority
@@ -165,7 +167,7 @@ export default function Scene() {
             />
             {isHome && hoverId && lit && (
               <Image
-                src="/scene/credenza.webp"
+                src={`${BASE}/scene/credenza.webp`}
                 alt=""
                 fill
                 unoptimized
