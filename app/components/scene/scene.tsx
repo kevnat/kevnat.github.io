@@ -68,7 +68,7 @@ export default function Scene({ locked = false }: { locked?: boolean }) {
   const [hoverId, setHoverId] = useState<string | null>(null);
   // On first landing, each label shows briefly in turn to say what's clickable.
   const [introDone, setIntroDone] = useState(false);
-  const introActive = isHome && animate && !introDone && !locked;
+  const introActive = isHome && animate && !introDone;
 
   useEffect(() => {
     if (!introActive) return;
