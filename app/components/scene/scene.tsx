@@ -46,20 +46,29 @@ function cameraFor(h: (typeof hotspots)[number], g: Geo) {
   const cy = g.T + (h.top + h.height / 2) * g.H;
   const clamp = (v: number, lo: number, hi: number) =>
     Math.min(hi, Math.max(lo, v));
-  const tx = clamp(g.vw / 2 - ZOOM * cx, g.vw - ZOOM * (g.L + g.W), -ZOOM * g.L);
-  const ty = clamp(g.vh * 0.45 - ZOOM * cy, g.vh - ZOOM * (g.T + g.H), -ZOOM * g.T);
+  const tx = clamp(
+    g.vw / 2 - ZOOM * cx,
+    g.vw - ZOOM * (g.L + g.W),
+    -ZOOM * g.L,
+  );
+  const ty = clamp(
+    g.vh * 0.45 - ZOOM * cy,
+    g.vh - ZOOM * (g.T + g.H),
+    -ZOOM * g.T,
+  );
   return `translate(${tx}px, ${ty}px) scale(${ZOOM})`;
 }
 
-export default function Scene() {
+// `locked` is the coming-soon mode: always the home view, with the objects inert.
+export default function Scene({ locked = false }: { locked?: boolean }) {
   const pathname = usePathname();
-  const isHome = pathname === "/";
+  const isHome = locked || pathname === "/";
   const [geo, setGeo] = useState<Geo | null>(null);
   const [animate, setAnimate] = useState(false);
   const [hoverId, setHoverId] = useState<string | null>(null);
   // On first landing, each label shows briefly in turn to say what's clickable.
   const [introDone, setIntroDone] = useState(false);
-  const introActive = isHome && animate && !introDone;
+  const introActive = isHome && animate && !introDone && !locked;
 
   useEffect(() => {
     if (!introActive) return;
@@ -197,56 +206,58 @@ export default function Scene() {
               );
             })}
 
-            <nav
-              aria-label="Sections"
-              className="absolute inset-0"
-              inert={!isHome}
-            >
-              {hotspots.map((h) => {
-                const sleeve = sleeves.find((s) => s.id === h.id);
-                if (!sleeve) return null;
-                return (
-                  <Link
-                    key={h.id}
-                    href={sleeve.href}
-                    aria-label={sleeve.title}
-                    className="scene-hotspot"
-                    style={{
-                      left: `${h.left * 100}%`,
-                      top: `${h.top * 100}%`,
-                      width: `${h.width * 100}%`,
-                      height: `${h.height * 100}%`,
-                    }}
-                    // The link goes inert on navigation, so mouseleave never
-                    // fires; clear here or the hover glow pops on when we return.
-                    onClick={() => {
-                      setHoverId(null);
-                      setIntroDone(true);
-                    }}
-                    onMouseEnter={() => {
-                      setHoverId(h.id);
-                      setIntroDone(true);
-                    }}
-                    onMouseLeave={() => setHoverId(null)}
-                    onFocus={() => setHoverId(h.id)}
-                    onBlur={() => setHoverId(null)}
-                  >
-                    <span
-                      className="scene-label"
-                      data-intro={introActive ? "" : undefined}
+            {!locked && (
+              <nav
+                aria-label="Sections"
+                className="absolute inset-0"
+                inert={!isHome}
+              >
+                {hotspots.map((h) => {
+                  const sleeve = sleeves.find((s) => s.id === h.id);
+                  if (!sleeve) return null;
+                  return (
+                    <Link
+                      key={h.id}
+                      href={sleeve.href}
+                      aria-label={sleeve.title}
+                      className="scene-hotspot"
                       style={{
-                        transform: "translateX(-50%)",
-                        animationDelay: introActive
-                          ? `${1.4 + sleeves.indexOf(sleeve) * 0.55}s`
-                          : undefined,
+                        left: `${h.left * 100}%`,
+                        top: `${h.top * 100}%`,
+                        width: `${h.width * 100}%`,
+                        height: `${h.height * 100}%`,
                       }}
+                      // The link goes inert on navigation, so mouseleave never
+                      // fires; clear here or the hover glow pops on when we return.
+                      onClick={() => {
+                        setHoverId(null);
+                        setIntroDone(true);
+                      }}
+                      onMouseEnter={() => {
+                        setHoverId(h.id);
+                        setIntroDone(true);
+                      }}
+                      onMouseLeave={() => setHoverId(null)}
+                      onFocus={() => setHoverId(h.id)}
+                      onBlur={() => setHoverId(null)}
                     >
-                      {sleeve.title}
-                    </span>
-                  </Link>
-                );
-              })}
-            </nav>
+                      <span
+                        className="scene-label"
+                        data-intro={introActive ? "" : undefined}
+                        style={{
+                          transform: "translateX(-50%)",
+                          animationDelay: introActive
+                            ? `${1.4 + sleeves.indexOf(sleeve) * 0.55}s`
+                            : undefined,
+                        }}
+                      >
+                        {sleeve.title}
+                      </span>
+                    </Link>
+                  );
+                })}
+              </nav>
+            )}
           </div>
         )}
       </div>
@@ -267,18 +278,20 @@ export default function Scene() {
         }}
       />
 
-      <div
-        className="pointer-events-none fixed z-20"
-        style={{
-          left: 24,
-          bottom: 18,
-          opacity: isHome ? 1 : 0,
-          transition: animate ? "opacity 0.8s ease" : "none",
-        }}
-      >
-        <h1 className="scene-name">{intro.name}</h1>
-        <p className="sr-only">{intro.line}</p>
-      </div>
+      {!locked && (
+        <div
+          className="pointer-events-none fixed z-20"
+          style={{
+            left: 24,
+            bottom: 18,
+            opacity: isHome ? 1 : 0,
+            transition: animate ? "opacity 0.8s ease" : "none",
+          }}
+        >
+          <h1 className="scene-name">{intro.name}</h1>
+          <p className="sr-only">{intro.line}</p>
+        </div>
+      )}
     </div>
   );
 }
