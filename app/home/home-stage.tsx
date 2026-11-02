@@ -49,11 +49,8 @@ export default function HomeStage() {
                     onFocus={() => setActiveId(sleeve.id)}
                     onBlur={() => setActiveId(null)}
                     data-dimmed={dimmed}
-                    className="home-sleeve group flex aspect-[4/5] flex-col justify-between border border-border bg-surface/40 p-5 backdrop-blur-sm sm:aspect-[3/4]"
+                    className="home-sleeve group flex aspect-[4/5] flex-col justify-end border border-border bg-surface/40 p-5 backdrop-blur-sm sm:aspect-[3/4]"
                   >
-                    <span className="font-mono text-xs tracking-widest text-muted-foreground">
-                      {sleeve.index}
-                    </span>
                     <span>
                       <span className="block text-2xl tracking-[0.2em] text-foreground">
                         {sleeve.title}

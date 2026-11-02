@@ -1,6 +1,5 @@
 export type Sleeve = {
   id: string;
-  index: string;
   title: string;
   caption: string;
   href: string;
@@ -16,7 +15,6 @@ export const intro = {
 export const sleeves: Sleeve[] = [
   {
     id: "about",
-    index: "A1",
     title: "About me",
     caption: "The person behind the roadmap",
     href: "/about",
@@ -24,7 +22,6 @@ export const sleeves: Sleeve[] = [
   },
   {
     id: "focus",
-    index: "A2",
     title: "Focus",
     caption: "My current role and prototypes",
     href: "/focus",
@@ -32,7 +29,6 @@ export const sleeves: Sleeve[] = [
   },
   {
     id: "side-projects",
-    index: "B1",
     title: "Side projects",
     caption: "What I build when the laptop closes",
     href: "/side-projects",
@@ -40,7 +36,6 @@ export const sleeves: Sleeve[] = [
   },
   {
     id: "resume",
-    index: "B2",
     title: "Resume",
     caption: "Ten years, on one page",
     href: "/resume",

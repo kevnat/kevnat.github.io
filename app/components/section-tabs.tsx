@@ -12,6 +12,14 @@ export default function SectionTabs() {
       className="mx-auto hidden w-full max-w-6xl px-6 pt-6 md:flex lg:px-8"
     >
       <ul className="flex gap-6">
+        <li className="mr-4">
+          <Link
+            href="/"
+            className="font-mono text-xs tracking-widest text-muted-foreground uppercase transition-colors hover:text-accent"
+          >
+            &larr; Home
+          </Link>
+        </li>
         {sleeves.map((s) => {
           const active = s.href === pathname;
           return (

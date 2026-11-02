@@ -57,6 +57,15 @@ export default function Scene() {
   const [geo, setGeo] = useState<Geo | null>(null);
   const [animate, setAnimate] = useState(false);
   const [hoverId, setHoverId] = useState<string | null>(null);
+  // On first landing, each label shows briefly in turn to say what's clickable.
+  const [introDone, setIntroDone] = useState(false);
+  const introActive = isHome && animate && !introDone;
+
+  useEffect(() => {
+    if (!introActive) return;
+    const t = setTimeout(() => setIntroDone(true), 5400);
+    return () => clearTimeout(t);
+  }, [introActive]);
 
   useIsoLayoutEffect(() => {
     const update = () => setGeo(computeGeo());
@@ -82,12 +91,6 @@ export default function Scene() {
   const activeId = isHome
     ? null
     : (sleeves.find((s) => s.href === pathname)?.id ?? null);
-  const litId = hoverId ?? activeId;
-  const lit = hotspots.find((h) => h.id === litId);
-
-  const glowX = lit ? lit.left + lit.width / 2 : lamp.x;
-  const glowY = lit ? 1 - (lit.top + lit.height / 2) : lamp.y;
-
   const fade = animate ? "opacity 1s ease" : "none";
   const stageBox = geo
     ? { left: geo.L, top: geo.T, width: geo.W, height: geo.H }
@@ -104,11 +107,10 @@ export default function Scene() {
         className="scene-camera fixed inset-0 z-[1]"
         style={{
           transformOrigin: "0 0",
-          willChange: "transform, filter",
+          willChange: "transform",
           transform: camera,
-          filter: isHome ? "none" : "blur(1.2px) brightness(0.85)",
           transition: animate
-            ? "transform 1.1s cubic-bezier(0.65, 0.05, 0.2, 1), filter 1s ease"
+            ? "transform 1.1s cubic-bezier(0.65, 0.05, 0.2, 1)"
             : "none",
         }}
       >
@@ -150,7 +152,7 @@ export default function Scene() {
             mixBlendMode: "screen",
           }}
         >
-          <AmbientCanvas overlay glowX={glowX} glowY={glowY} />
+          <AmbientCanvas overlay glowX={lamp.x} glowY={lamp.y} />
         </div>
 
         {geo && (
@@ -165,21 +167,35 @@ export default function Scene() {
               sizes="100vw"
               aria-hidden="true"
             />
-            {isHome && hoverId && lit && (
-              <Image
-                src={`${BASE}/scene/credenza.webp`}
-                alt=""
-                fill
-                unoptimized
-                sizes="100vw"
-                aria-hidden="true"
-                className="scene-highlight"
-                style={{
-                  maskImage: `radial-gradient(ellipse ${lit.width * 85}% ${lit.height * 110}% at ${(lit.left + lit.width / 2) * 100}% ${(lit.top + lit.height / 2) * 100}%, #000 35%, transparent 100%)`,
-                  WebkitMaskImage: `radial-gradient(ellipse ${lit.width * 85}% ${lit.height * 110}% at ${(lit.left + lit.width / 2) * 100}% ${(lit.top + lit.height / 2) * 100}%, #000 35%, transparent 100%)`,
-                }}
-              />
-            )}
+            {/* Each object has its own glow that eases in and out on hover.
+                The sculpture sits right beside the shelf light, so it's subdued. */}
+            {hotspots.map((h) => {
+              const on = isHome && hoverId === h.id;
+              const mask = `radial-gradient(ellipse ${h.width * 85}% ${h.height * 110}% at ${(h.left + h.width / 2) * 100}% ${(h.top + h.height / 2) * 100}%, #000 35%, transparent 100%)`;
+              return (
+                <div
+                  key={h.id}
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0"
+                  style={{
+                    opacity: on ? (h.id === "about" ? 0.5 : 1) : 0,
+                    transition: on
+                      ? "opacity 1.3s cubic-bezier(0.4, 0, 0.2, 1)"
+                      : "opacity 1.8s cubic-bezier(0.4, 0, 0.2, 1)",
+                  }}
+                >
+                  <Image
+                    src={`${BASE}/scene/credenza.webp`}
+                    alt=""
+                    fill
+                    unoptimized
+                    sizes="100vw"
+                    className={`scene-highlight${on ? " is-on" : ""}`}
+                    style={{ maskImage: mask, WebkitMaskImage: mask }}
+                  />
+                </div>
+              );
+            })}
 
             <nav
               aria-label="Sections"
@@ -203,15 +219,27 @@ export default function Scene() {
                     }}
                     // The link goes inert on navigation, so mouseleave never
                     // fires; clear here or the hover glow pops on when we return.
-                    onClick={() => setHoverId(null)}
-                    onMouseEnter={() => setHoverId(h.id)}
+                    onClick={() => {
+                      setHoverId(null);
+                      setIntroDone(true);
+                    }}
+                    onMouseEnter={() => {
+                      setHoverId(h.id);
+                      setIntroDone(true);
+                    }}
                     onMouseLeave={() => setHoverId(null)}
                     onFocus={() => setHoverId(h.id)}
                     onBlur={() => setHoverId(null)}
                   >
                     <span
                       className="scene-label"
-                      style={{ transform: "translateX(-50%)" }}
+                      data-intro={introActive ? "" : undefined}
+                      style={{
+                        transform: "translateX(-50%)",
+                        animationDelay: introActive
+                          ? `${1.4 + sleeves.indexOf(sleeve) * 0.55}s`
+                          : undefined,
+                      }}
                     >
                       {sleeve.title}
                     </span>
@@ -223,13 +251,17 @@ export default function Scene() {
         )}
       </div>
 
-      {/* Dim the zoomed scene so page content reads over it */}
+      {/* Dim and soften the zoomed scene so page content reads over it. The blur
+          lives here, not as a filter on the zoomed layer: filtering a huge
+          scaled layer forces expensive re-rasterising and flashes on zoom-out. */}
       <div
         aria-hidden="true"
         className="pointer-events-none fixed inset-0 z-[5]"
         style={{
           background:
             "radial-gradient(ellipse at 50% 45%, rgba(20,13,8,.55) 0%, rgba(20,13,8,.78) 100%)",
+          WebkitBackdropFilter: "blur(1.5px) brightness(0.85)",
+          backdropFilter: "blur(1.5px) brightness(0.85)",
           opacity: isHome ? 0 : 1,
           transition: fade,
         }}

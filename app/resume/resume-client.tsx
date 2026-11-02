@@ -16,8 +16,11 @@ export default function ResumeClient() {
     timeline.find((entry) => entry.id === activeId) ?? timeline[0];
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-6 pt-16 lg:px-8">
-      <BackLink />
+    <div className="mx-auto w-full max-w-6xl px-6 pt-16 pb-12 md:pt-10 md:pb-16 lg:px-8">
+      <div className="scene-glass">
+      <div className="mb-6 md:hidden">
+        <BackLink />
+      </div>
       <ProfileHeader />
       <div className="grid grid-cols-1 gap-8 py-12 lg:grid-cols-[220px_1fr_320px] lg:gap-12">
         <TimelineNav
@@ -27,6 +30,7 @@ export default function ResumeClient() {
         />
         <Narrative entry={activeEntry} />
         <HighlightsPanel key={activeEntry.id} highlights={activeEntry.highlights} />
+      </div>
       </div>
     </div>
   );

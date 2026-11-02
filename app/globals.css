@@ -171,8 +171,22 @@ body {
 
 .scene-highlight {
   filter: brightness(1.4) saturate(1.15);
-  transition: opacity 0.4s ease;
   pointer-events: none;
+}
+
+/* Once lit, the glow breathes slowly */
+.scene-highlight.is-on {
+  animation: glow-breathe 5s ease-in-out infinite;
+}
+
+@keyframes glow-breathe {
+  0%,
+  100% {
+    opacity: 0.72;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 .scene-hotspot {
@@ -212,6 +226,24 @@ body {
   background: rgba(243, 227, 204, 0.6);
 }
 
+/* First-landing hint: labels appear one after another, then fade away */
+.scene-label[data-intro] {
+  animation: label-intro 2.4s ease both;
+}
+
+@keyframes label-intro {
+  0% {
+    opacity: 0;
+  }
+  18%,
+  72% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
 .scene-hotspot:hover .scene-label,
 .scene-hotspot:focus-visible .scene-label {
   opacity: 1;
@@ -220,6 +252,11 @@ body {
 @media (hover: none) {
   .scene-label {
     opacity: 0.7;
+  }
+
+  .scene-label[data-intro],
+  .scene-highlight.is-on {
+    animation: none;
   }
 }
 
@@ -278,6 +315,11 @@ body {
   .scene-record-disc {
     animation: none;
   }
+
+  .scene-label[data-intro],
+  .scene-highlight.is-on {
+    animation: none;
+  }
 }
 
 /* Inner pages at md+ sit over the dark zoomed scene, whatever the system theme */
@@ -290,6 +332,43 @@ body {
     --border: rgba(240, 226, 207, 0.28);
     --accent: #c9a377;
     color: var(--foreground);
+  }
+}
+
+/* Liquid-glass pane behind inner-page text (md+ only, where the scene shows) */
+@media (min-width: 768px) {
+  .scene-glass {
+    position: relative;
+    isolation: isolate;
+    padding: 2.5rem;
+    border-radius: 28px;
+    background:
+      radial-gradient(120% 80% at 0% 0%, rgba(255, 255, 255, 0.16), transparent 55%),
+      linear-gradient(160deg, rgba(255, 244, 228, 0.1), rgba(30, 20, 12, 0.34));
+    -webkit-backdrop-filter: blur(26px) saturate(1.7) brightness(1.08);
+    backdrop-filter: blur(26px) saturate(1.7) brightness(1.08);
+    border: 1px solid rgba(255, 244, 228, 0.16);
+    box-shadow:
+      inset 1.5px 1.5px 0 rgba(255, 255, 255, 0.34),
+      inset -1px -1px 0 rgba(255, 255, 255, 0.08),
+      inset 0 0 28px rgba(255, 255, 255, 0.05),
+      0 24px 60px rgba(8, 4, 2, 0.45),
+      0 2px 6px rgba(8, 4, 2, 0.3);
+  }
+
+  /* Specular sheen along the top edge, like light catching a glass rim */
+  .scene-glass::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.14),
+      rgba(255, 255, 255, 0) 22%
+    );
   }
 }
 
