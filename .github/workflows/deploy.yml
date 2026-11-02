@@ -28,8 +28,8 @@ jobs:
       - run: npm run build
         env:
           NEXT_PUBLIC_BASE_PATH: /portfolio
-          # Remove this line to put the full site live.
-          NEXT_PUBLIC_COMING_SOON: "true"
+          # Production shows "coming soon" by default. To go live, add:
+          # NEXT_PUBLIC_COMING_SOON: "false"
       - uses: actions/upload-pages-artifact@v3
         with:
           path: out

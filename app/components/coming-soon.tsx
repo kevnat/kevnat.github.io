@@ -1,7 +1,7 @@
 import { intro } from "../home/sleeves";
 
 // Static holding page, shown in place of the whole site while
-// NEXT_PUBLIC_COMING_SOON=true (set in .github/workflows/deploy.yml).
+// the flag in app/lib/site.ts is on (the default for production builds).
 export default function ComingSoon() {
   return (
     <main className="home-stage relative flex min-h-screen flex-1 items-center justify-center overflow-hidden px-6">
