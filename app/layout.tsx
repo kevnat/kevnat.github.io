@@ -31,7 +31,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${zenKakuGothicNew.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body
+        className="min-h-full flex flex-col"
+        // Coming soon is all dark room: match it so nothing white shows before the scene paints.
+        style={comingSoon ? { background: "#1c150e" } : undefined}
+      >
         {comingSoon ? (
           <ComingSoon />
         ) : (

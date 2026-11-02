@@ -69,6 +69,17 @@ export default function Scene({ locked = false }: { locked?: boolean }) {
   // On first landing, each label shows briefly in turn to say what's clickable.
   const [introDone, setIntroDone] = useState(false);
   const introActive = isHome && animate && !introDone;
+  // Hold the scene invisible until its images are in, then fade up from the
+  // dark base instead of popping in piece by piece.
+  const [roomLoaded, setRoomLoaded] = useState(false);
+  const [credenzaLoaded, setCredenzaLoaded] = useState(false);
+  const [giveUp, setGiveUp] = useState(false);
+  const ready = (roomLoaded && credenzaLoaded) || giveUp;
+
+  useEffect(() => {
+    const t = setTimeout(() => setGiveUp(true), 3000);
+    return () => clearTimeout(t);
+  }, []);
 
   useEffect(() => {
     if (!introActive) return;
@@ -118,9 +129,10 @@ export default function Scene({ locked = false }: { locked?: boolean }) {
           transformOrigin: "0 0",
           willChange: "transform",
           transform: camera,
+          opacity: ready ? 1 : 0,
           transition: animate
-            ? "transform 1.1s cubic-bezier(0.65, 0.05, 0.2, 1)"
-            : "none",
+            ? "transform 1.1s cubic-bezier(0.65, 0.05, 0.2, 1), opacity 0.9s ease"
+            : "opacity 0.9s ease",
         }}
       >
         <div
@@ -147,6 +159,7 @@ export default function Scene({ locked = false }: { locked?: boolean }) {
               fill
               priority
               unoptimized
+              onLoad={() => setRoomLoaded(true)}
               sizes="100vw"
             />
           </div>
@@ -173,6 +186,7 @@ export default function Scene({ locked = false }: { locked?: boolean }) {
               fill
               priority
               unoptimized
+              onLoad={() => setCredenzaLoaded(true)}
               sizes="100vw"
               aria-hidden="true"
             />
